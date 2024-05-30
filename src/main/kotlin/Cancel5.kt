@@ -16,7 +16,7 @@ suspend fun main() {
         println("startuje job1")
         try {
             delay(10000)
-
+            println("Nie zobacze bo cancel")
         } finally {
             println("finally job1")
         }
