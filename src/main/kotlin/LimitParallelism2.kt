@@ -5,24 +5,22 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 
-var mycounter = 0
-val mysingleThreadDispatcher: CoroutineDispatcher = Dispatchers.IO.limitedParallelism(1)
 fun main(): Unit = runBlocking {
-    doSth(100000) { mycounter++ }
-    println(mycounter)
+    var counter = 0
+    val mysingleThreadDispatcher: CoroutineDispatcher = Dispatchers.IO.limitedParallelism(1)
+    doSth(100000, mysingleThreadDispatcher) { counter++ }
+    println(counter)
 }
 
 
-suspend fun doSth(count: Int, action: (Unit) -> Unit) = coroutineScope {
+suspend fun doSth(count: Int, dispatcher: CoroutineDispatcher, action: (Unit) -> Unit) = coroutineScope {
     withContext(Dispatchers.IO) {
         repeat(count) {
-            launch(mysingleThreadDispatcher) { action.invoke(Unit) }
+            launch(dispatcher) { action.invoke(Unit) }
 
             //!!!!WRONG
             //launch(Dispatchers.IO.limitedParallelism(1)) { action.invoke(Unit) }
             //as each repeat will get its own dispatcher!!!
         }
     }
-
 }
-
