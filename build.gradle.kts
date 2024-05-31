@@ -15,6 +15,8 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.0")
     testImplementation("org.junit.jupiter:junit-jupiter-engine:5.9.1")
+    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.9.1")
+    testImplementation("org.hamcrest:hamcrest:2.2")
 }
 
 tasks.test {
