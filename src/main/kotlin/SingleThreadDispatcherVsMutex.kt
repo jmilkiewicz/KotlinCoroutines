@@ -21,6 +21,8 @@ fun main(): Unit {
         "Counter: $counter and took $took for mutex"
     }
     println(runBlocking(block = mutex))
+
+
     counter = 0
     val withSingleThreadDispatcher: suspend CoroutineScope.() -> String = {
         val took = measureTime {
@@ -35,6 +37,8 @@ fun main(): Unit {
         "Counter: $counter and took $took for single dispatcher"
     }
     println(runBlocking(block = withSingleThreadDispatcher))
+
+
     counter = 0
     val withoutAnySynch: suspend CoroutineScope.() -> String = {
         val took = measureTime {
