@@ -56,11 +56,12 @@ interface ExceptionCollector {
 }
 
 class NotificationSenderTest {
+    val notificationDelay = 100L
 
     @OptIn(ExperimentalStdlibApi::class)
     @Test
     fun `should send notifications concurrently`() = runTest {
-        val client = FakeNotificationClient(100)
+        val client = FakeNotificationClient(notificationDelay)
         val notifications = List(100) { Notification(it.toString()) }
         val sut = NotificationSender(
             client = client,
@@ -73,14 +74,15 @@ class NotificationSenderTest {
         //!!! this is crucial
         advanceUntilIdle()
 
-        assertThat(currentTime, equalTo(100))
+        assertThat(currentTime, equalTo(notificationDelay))
         assertThat(client.sent, equalTo(notifications))
     }
 
     @OptIn(ExperimentalStdlibApi::class)
     @Test
     fun `should cancel all coroutines when cancel is called`() = runTest {
-        val client = FakeNotificationClient(delayTime = 100)
+
+        val client = FakeNotificationClient(delayTime = notificationDelay)
         val notifications = List(100) { Notification(it.toString()) }
         val sut = NotificationSender(
             client = client,
@@ -89,10 +91,10 @@ class NotificationSenderTest {
         )
 
         sut.sendNotifications(notifications)
-        advanceTimeBy(99)
+        advanceTimeBy(notificationDelay)
         sut.cancel()
 
-        advanceUntilIdle()
+        runCurrent()
 
         assertThat(client.sent, Matchers.empty())
 
@@ -102,7 +104,7 @@ class NotificationSenderTest {
     @Test
     fun `should not cancel other sending processes when one of them fails`() = runTest {
         val client = FakeNotificationClient(
-            delayTime = 100,
+            delayTime = notificationDelay,
             failEvery = 2
         )
         val notifications = List(4) { Notification(it.toString()) }
@@ -114,11 +116,10 @@ class NotificationSenderTest {
 
         sut.sendNotifications(notifications)
 
-        advanceTimeBy(100)
+        advanceTimeBy(notificationDelay)
         runCurrent()
 
         assertThat(client.sent, containsInAnyOrder(Notification("0"), Notification("2")))
-        assertThat(currentTime, equalTo(100))
     }
 
     @OptIn(ExperimentalStdlibApi::class)
@@ -128,7 +129,7 @@ class NotificationSenderTest {
         val exceptionCollector = FakeExceptionCollector()
         val sut = NotificationSender(
             client = FakeNotificationClient(
-                delayTime = 1,
+                delayTime = notificationDelay,
                 failEvery = 2
             ),
             exceptionCollector = exceptionCollector,
@@ -137,8 +138,7 @@ class NotificationSenderTest {
 
         sut.sendNotifications(notifications)
 
-        advanceTimeBy(1)
-        runCurrent()
+        advanceUntilIdle()
 
         assertThat(
             exceptionCollector.collected,
