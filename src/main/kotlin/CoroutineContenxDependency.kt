@@ -51,7 +51,6 @@ fun main() = runBlocking(CoroutineName("main")) {
     var v2InternalExecuted = false
     val v2 = async(Dispatchers.IO) {
         println("async2#1 start")
-        delay(500)
         GlobalScope.async {
             println("async2#1 start")
             delay(500)
